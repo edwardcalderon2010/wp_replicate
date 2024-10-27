@@ -1,0 +1,14 @@
+DB_NAME:empower_autism_staging
+DB_USER:empower_autism_user
+DB_PWD:r3#dW@Hs0s4!
+DB_IMPORT_SQL:empowera_asperger_new.sql
+WP_INSTANCE:wpstaginginst
+WP_AS_SUBDIRECTORY:true
+WP_HTTP_PROTOCOL:https
+WP_TEMPLATE:empower_autism.tar.gz
+WP_ROOT:/var/www/localhost
+WP_ADMIN_EMAIL:website@empowerautism.org.au
+WEB_DOMAIN:localhost
+SUPER_USER:true
+READONLY:true
+

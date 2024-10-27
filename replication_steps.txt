@@ -1,0 +1,19 @@
+# Database
+sudo mysql -u root < empowera_asperger_new.sql
+sudo mysql -u root < delete_ninja_forms_by_postid.sql
+
+# if you need to change a password
+alter user 'empower_autism_user'@'localhost' IDENTIFIED BY 'r3#dW@Hs0s4!';
+
+# Website Install
+sudo rm -rf ea_staging/
+sudo tar -xvzf empower_autism.tar.gz 
+sudo mv empower_autism ea_staging
+rm -rf ea_staging/.htaccess
+sudo cp cyberpress/.htaccess ea_staging/
+sudo chown -R www-data ea_staging/
+sudo chgrp -R admin ea_staging/
+sudo chmod -R 755 ea_staging/
+sudo sed -i 's/\(^define(\s\+\o47DB_NAME\o47\o54\s\+\o47\).*\(\o47\)/\1empower_autism_staging\2/g' wp-config.php
+sudo sed -i 's/\(^define(\s\+\o47DB_USER\o47\o54\s\+\o47\).*\(\o47\)/\1empower_autism_user\2/g' wp-config.php
+sudo sed -i 's/\(^define(\s\+\o47DB_PASSWORD\o47\o54\s\+\o47\).*\(\o47\)/\1r3#dW@Hs0s4!\2/g' wp-config.php
