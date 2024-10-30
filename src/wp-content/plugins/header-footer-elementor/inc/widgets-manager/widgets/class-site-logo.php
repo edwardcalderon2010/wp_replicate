@@ -93,10 +93,24 @@ class Site_Logo extends Widget_Base {
 	}
 
 	/**
+	 * Indicates if the widget's content is dynamic.
+	 *
+	 * This method returns true if the widget's output is dynamic and should not be cached,
+	 * or false if the content is static and can be cached.
+	 *
+	 * @since 1.6.41
+	 * @return bool True for dynamic content, false for static content.
+	 */
+	protected function is_dynamic_content(): bool { // phpcs:ignore
+		return false;
+	}
+
+	/**
 	 * Register Site Logo controls.
 	 *
 	 * @since 1.5.7
 	 * @access protected
+	 * @return void
 	 */
 	protected function register_controls() {
 		$this->register_content_site_logo_controls();
@@ -109,6 +123,7 @@ class Site_Logo extends Widget_Base {
 	 *
 	 * @since 1.3.0
 	 * @access protected
+	 * @return void
 	 */
 	protected function register_content_site_logo_controls() {
 		$this->start_controls_section(
@@ -275,6 +290,7 @@ class Site_Logo extends Widget_Base {
 	 *
 	 * @since 1.3.0
 	 * @access protected
+	 * @return void
 	 */
 	protected function register_site_logo_styling_controls() {
 		$this->start_controls_section(
@@ -555,6 +571,7 @@ class Site_Logo extends Widget_Base {
 	 *
 	 * @since 1.3.0
 	 * @access protected
+	 * @return void
 	 */
 	protected function register_site_logo_caption_styling_controls() {
 		$this->start_controls_section(
@@ -689,6 +706,7 @@ class Site_Logo extends Widget_Base {
 	 * @since 1.3.0
 	 * @param array $size returns the size of an image.
 	 * @access public
+	 * @return string
 	 */
 	public function site_image_url( $size ) {
 		$settings = $this->get_settings_for_display();
@@ -707,6 +725,7 @@ class Site_Logo extends Widget_Base {
 	 *
 	 * @since 1.3.0
 	 * @access protected
+	 * @return void
 	 */
 	protected function render() {
 		$link     = '';
@@ -756,7 +775,7 @@ class Site_Logo extends Widget_Base {
 						$class = 'elementor-non-clickable';
 					}
 					?>
-				<a data-elementor-open-lightbox="<?php echo esc_attr( $settings['open_lightbox'] ); ?>"  class='<?php echo  esc_attr( $class ); ?>' <?php $this->print_render_attribute_string( 'link' ); ?>>
+				<a data-elementor-open-lightbox="<?php echo esc_attr( $settings['open_lightbox'] ); ?>"  class='<?php echo esc_attr( $class ); ?>' <?php $this->print_render_attribute_string( 'link' ); ?>>
 		<?php endif; ?>
 		<?php
 		if ( empty( $site_image ) ) {
@@ -862,7 +881,7 @@ class Site_Logo extends Widget_Base {
 	 * @access private
 	 *
 	 * @param array $settings returns settings.
-	 * @return array|string|false An array/string containing the link URL, or false if no link.
+	 * @return array|string|false|void An array/string containing the link URL, or false if no link.
 	 */
 	private function get_link_url( $settings ) {
 		if ( 'none' === $settings['link_to'] ) {

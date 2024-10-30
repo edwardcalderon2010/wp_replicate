@@ -82,10 +82,24 @@ class Copyright extends Widget_Base {
 	}
 
 	/**
+	 * Indicates if the widget's content is dynamic.
+	 *
+	 * This method returns true if the widget's output is dynamic and should not be cached,
+	 * or false if the content is static and can be cached.
+	 *
+	 * @since 1.6.41
+	 * @return bool True for dynamic content, false for static content.
+	 */
+	protected function is_dynamic_content(): bool { // phpcs:ignore
+		return false;
+	}
+
+	/**
 	 * Register Copyright controls.
 	 *
 	 * @since 1.5.7
 	 * @access protected
+	 * @return void
 	 */
 	protected function register_controls() {
 		$this->register_content_copy_right_controls();
@@ -95,6 +109,7 @@ class Copyright extends Widget_Base {
 	 *
 	 * @since 1.2.0
 	 * @access protected
+	 * @return void
 	 */
 	protected function register_content_copy_right_controls() {
 		$this->start_controls_section(
@@ -185,6 +200,7 @@ class Copyright extends Widget_Base {
 	 *
 	 * @since 1.2.0
 	 * @access protected
+	 * @return void
 	 */
 	protected function render() {
 		$settings = $this->get_settings_for_display();
@@ -214,6 +230,7 @@ class Copyright extends Widget_Base {
 	 *
 	 * @since 1.2.0
 	 * @access public
+	 * @return void
 	 */
 	public function render_plain_content() {
 		// In plain mode, render without shortcode.
@@ -227,6 +244,7 @@ class Copyright extends Widget_Base {
 	 *
 	 * @since 1.3.0
 	 * @access protected
+	 * @return void
 	 */
 	protected function content_template() {}
 }

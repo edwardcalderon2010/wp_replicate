@@ -455,10 +455,7 @@ class Give_Scripts {
 	 * @since 2.1.0
 	 */
 	public function public_enqueue_styles() {
-		if ( ! is_front_page() ) {
-
-			wp_enqueue_style( 'give-styles' );
-		}
+		wp_enqueue_style( 'give-styles' );
 	}
 
 

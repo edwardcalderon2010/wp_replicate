@@ -2,11 +2,11 @@
 
 namespace WPMailSMTP\Pro\Emails\Logs\Providers;
 
+use Exception;
+use WP_Error;
 use WPMailSMTP\MailCatcherInterface;
-use WPMailSMTP\Options;
 use WPMailSMTP\Pro\Emails\Logs\Attachments\Attachments;
 use WPMailSMTP\Pro\Emails\Logs\Email;
-use WPMailSMTP\Pro\Emails\Logs\Webhooks\Webhooks;
 use WPMailSMTP\Providers\MailerAbstract;
 
 /**
@@ -79,7 +79,7 @@ class Common {
 	public function save_before( $parent_email_id = 0 ) {
 
 		$mailer_slug = wp_mail_smtp()->get_connections_manager()->get_mail_connection()->get_mailer_slug();
-		$headers     = explode( $this->mailcatcher->get_line_ending(), $this->mailcatcher->createHeader() );
+		$headers     = $this->unfold_headers( $this->mailcatcher->createHeader() );
 		$attachments = count( $this->mailcatcher->getAttachments() );
 		$people      = $this->get_people();
 		$email_id    = 0;
@@ -104,7 +104,7 @@ class Common {
 			}
 
 			$email_id = $email->save()->get_id();
-		} catch ( \Exception $e ) { // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch
+		} catch ( Exception $e ) { // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch
 			// Do nothing for now.
 		}
 
@@ -124,12 +124,13 @@ class Common {
 	 */
 	public function save( $email_id = 0 ) {
 
-		$headers     = explode( $this->mailcatcher->get_line_ending(), $this->mailcatcher->createHeader() );
+		$headers     = $this->unfold_headers( $this->mailcatcher->createHeader() );
 		$attachments = count( $this->mailcatcher->getAttachments() );
 		$people      = $this->get_people();
 
 		try {
 			$email = new Email( $email_id );
+
 			$email
 				->set_subject( $this->mailcatcher->Subject )
 				->set_people( $people )
@@ -139,16 +140,11 @@ class Common {
 				->set_status( $this->get_email_status() )
 				->set_message_id( $this->get_message_id() );
 
-			// Set the email error if the email was not sent.
-			if ( $email->has_failed() ) {
-				$email->set_error_text( $this->mailer->get_response_error() );
-			}
-
 			$email_id = $email->save()->get_id();
 
 			// Save attachments to the email log.
 			( new Attachments() )->process_attachments( $email_id, $this->mailcatcher->getAttachments() );
-		} catch ( \Exception $e ) { // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch
+		} catch ( Exception $e ) { // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch
 			// Do nothing for now.
 		}
 
@@ -171,6 +167,42 @@ class Common {
 		}
 
 		return $status;
+	}
+
+	/**
+	 * Process the failed email sending.
+	 *
+	 * @since 4.0.0
+	 *
+	 * @param int             $email_id The Email ID.
+	 * @param WP_Error|string $error    The WP Error or error message.
+	 */
+	public function failed( $email_id, $error ) {
+
+		if ( empty( $email_id ) ) {
+			return;
+		}
+
+		if ( empty( $error ) ) {
+			$error = esc_html__( 'Unknown error.', 'wp-mail-smtp-pro' );
+		} elseif ( is_wp_error( $error ) ) {
+			$error = $error->get_error_message();
+		}
+
+		try {
+			$email = new Email( $email_id );
+
+			if ( empty( $email->get_id() ) ) {
+				return;
+			}
+
+			$email
+				->set_error_text( $error )
+				->set_status( Email::STATUS_UNSENT )
+				->save();
+		} catch ( Exception $e ) { // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch
+			// Do nothing for now.
+		}
 	}
 
 	/**
@@ -210,7 +242,7 @@ class Common {
 
 		$message_id = '';
 
-		$custom_id_mailers = [ 'sendlayer', 'smtpcom', 'postmark', 'sparkpost', 'sendgrid' ];
+		$custom_id_mailers = [ 'sendlayer', 'smtpcom', 'postmark', 'sparkpost', 'sendgrid', 'smtp2go' ];
 
 		if ( in_array( $this->mailer->get_mailer_name(), $custom_id_mailers, true ) ) {
 			foreach ( $this->mailcatcher->getCustomHeaders() as $header ) {
@@ -226,5 +258,26 @@ class Common {
 		}
 
 		return $message_id;
+	}
+
+	/**
+	 * Unfold long email headers.
+	 *
+	 * @see   Section 2.2.3 of https://www.rfc-editor.org/rfc/rfc2822.txt
+	 *
+	 * @since 4.1.0
+	 *
+	 * @param string $headers Generated email headers.
+	 *
+	 * @return false|string[]
+	 */
+	private function unfold_headers( $headers ) {
+
+		$line_ending    = $this->mailcatcher->get_line_ending();
+		$wsp_characters = '[ \t]';
+		$headers        = preg_replace( "/{$line_ending}{$wsp_characters}/", '', $headers );
+		$headers        = explode( $line_ending, $headers );
+
+		return $headers;
 	}
 }

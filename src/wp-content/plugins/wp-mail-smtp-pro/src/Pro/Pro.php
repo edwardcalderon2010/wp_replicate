@@ -5,6 +5,7 @@ namespace WPMailSMTP\Pro;
 use WPMailSMTP\Debug;
 use WPMailSMTP\Options;
 use WPMailSMTP\Pro\AdditionalConnections\AdditionalConnections;
+use WPMailSMTP\Pro\Admin\Area;
 use WPMailSMTP\Pro\Admin\DashboardWidget;
 use WPMailSMTP\Pro\Admin\PluginsList;
 use WPMailSMTP\Pro\Alerts\Alerts;
@@ -16,6 +17,7 @@ use WPMailSMTP\Pro\Emails\Logs\Importers\Importers;
 use WPMailSMTP\Pro\Emails\Logs\Logs;
 use WPMailSMTP\Pro\Emails\Logs\Reports\Reports;
 use WPMailSMTP\Pro\Emails\Logs\Tracking\Tracking;
+use WPMailSMTP\Pro\Emails\RateLimiting\RateLimiting;
 use WPMailSMTP\Pro\Emails\TestEmail;
 use WPMailSMTP\Pro\Providers\AmazonSES\Options as SESOptions;
 use WPMailSMTP\Pro\SmartRouting\SmartRouting;
@@ -88,7 +90,7 @@ class Pro {
 		add_filter( 'wp_mail_smtp_tasks_get_tasks', [ $this, 'get_tasks' ] );
 
 		// Register DB migrations.
-		add_filter( 'wp_mail_smtp_core_init_migrations', [ $this, 'get_migrations' ] );
+		add_filter( 'wp_mail_smtp_migrations_get_migrations', [ $this, 'get_migrations' ] );
 
 		// Add Pro specific DB tables to the list of custom DB tables.
 		add_filter( 'wp_mail_smtp_core_get_custom_db_tables', [ $this, 'add_pro_specific_custom_db_tables' ] );
@@ -99,6 +101,9 @@ class Pro {
 		// Disable the admin education notice-bar.
 		add_filter( 'wp_mail_smtp_admin_education_notice_bar', '__return_false' );
 
+		// Alias WPMailArgs class.
+		class_alias( 'WPMailSMTP\WPMailArgs', 'WPMailSMTP\Pro\WPMailArgs' );
+
 		$this->get_multisite()->init();
 		$this->get_control();
 		$this->get_logs();
@@ -108,6 +113,7 @@ class Pro {
 		$this->get_backup_connections();
 		$this->get_importers();
 		$this->get_translations();
+		$this->get_rate_limiting();
 
 		if ( is_admin() ) {
 			$this->get_site_health()->init();
@@ -128,6 +134,9 @@ class Pro {
 
 		// Initialize test email.
 		( new TestEmail() )->hooks();
+
+		// Initialize admin area.
+		( new Area() )->hooks();
 
 		// Usage tracking hooks.
 		add_filter( 'wp_mail_smtp_usage_tracking_get_data', [ $this, 'usage_tracking_get_data' ] );
@@ -189,7 +198,7 @@ class Pro {
 		add_filter(
 			'wp_mail_smtp_options_set',
 			function ( $options ) {
-				foreach ( [ 'email', 'slack_webhook', 'twilio_sms', 'custom_webhook' ] as $alert ) {
+				foreach ( array_keys( ( new AlertsLoader() )->get_providers() ) as $alert ) {
 					if ( isset( $options[ "alert_$alert" ]['connections'] ) ) {
 						$options[ "alert_$alert" ]['connections'] = array_unique(
 							$options[ "alert_$alert" ]['connections'],
@@ -220,6 +229,10 @@ class Pro {
 
 		if ( ! isset( $control ) ) {
 			$control = apply_filters( 'wp_mail_smtp_pro_get_control', new Emails\Control\Control() );
+
+			if ( method_exists( $control, 'init' ) ) {
+				$control->init();
+			}
 		}
 
 		return $control;
@@ -238,6 +251,10 @@ class Pro {
 
 		if ( ! isset( $logs ) ) {
 			$logs = apply_filters( 'wp_mail_smtp_pro_get_logs', new Emails\Logs\Logs() );
+
+			if ( method_exists( $logs, 'init' ) ) {
+				$logs->init();
+			}
 		}
 
 		return $logs;
@@ -274,6 +291,10 @@ class Pro {
 
 		if ( ! isset( $providers ) ) {
 			$providers = apply_filters( 'wp_mail_smtp_pro_get_providers', new Providers\Providers() );
+
+			if ( method_exists( $providers, 'init' ) ) {
+				$providers->init();
+			}
 		}
 
 		return $providers;
@@ -292,6 +313,10 @@ class Pro {
 
 		if ( ! isset( $license ) ) {
 			$license = apply_filters( 'wp_mail_smtp_pro_get_license', new License\License() );
+
+			if ( method_exists( $license, 'init' ) ) {
+				$license->init();
+			}
 		}
 
 		return $license;
@@ -435,6 +460,10 @@ class Pro {
 			 * @param Importers $importers The Importers object.
 			 */
 			$importers = apply_filters( 'wp_mail_smtp_pro_get_importers', new Importers() );
+
+			if ( method_exists( $importers, 'init' ) ) {
+				$importers->init();
+			}
 		}
 
 		return $importers;
@@ -486,6 +515,11 @@ class Pro {
 			return $args;
 		}
 
+		// Bail if plugins list is missing.
+		if ( empty( $args['body']['plugins'] ) ) {
+			return $args;
+		}
+
 		/*
 		 * If WP Mail SMTP is already in the list, don't add it again.
 		 *
@@ -493,6 +527,12 @@ class Pro {
 		 * The capitalized json data defines the array keys, therefore we need to check and define these as such.
 		 */
 		$plugins = json_decode( $args['body']['plugins'], true );
+
+		// Bail if plugin list can't be decoded or plugins list is missing.
+		if ( $plugins === null || ! isset( $plugins['plugins'] ) ) {
+			return $args;
+		}
+
 		foreach ( $plugins['plugins'] as $slug => $data ) {
 			if ( isset( $data['Name'] ) && $data['Name'] === 'WP Mail SMTP' ) {
 				return $args;
@@ -648,6 +688,7 @@ class Pro {
 				\WPMailSMTP\Pro\Tasks\Logs\SMTPcom\VerifySentStatusTask::class,
 				\WPMailSMTP\Pro\Tasks\Logs\Postmark\VerifySentStatusTask::class,
 				\WPMailSMTP\Pro\Tasks\Logs\SparkPost\VerifySentStatusTask::class,
+				\WPMailSMTP\Pro\Tasks\Logs\SMTP2GO\VerifySentStatusTask::class,
 				\WPMailSMTP\Pro\Tasks\Logs\ExportCleanupTask::class,
 				\WPMailSMTP\Pro\Tasks\Logs\ResendTask::class,
 				\WPMailSMTP\Pro\Tasks\Logs\BulkVerifySentStatusTask::class,
@@ -669,6 +710,7 @@ class Pro {
 	 */
 	public function get_migrations( $migrations ) {
 
+		// phpcs:disable WPForms.PHP.BackSlash.UseShortSyntax
 		return array_merge(
 			$migrations,
 			[
@@ -678,6 +720,7 @@ class Pro {
 				\WPMailSMTP\Pro\Emails\Logs\Attachments\Migration::class,
 			]
 		);
+		// phpcs:enable WPForms.PHP.BackSlash.UseShortSyntax
 	}
 
 	/**
@@ -944,6 +987,9 @@ class Pro {
 		$data['wp_mail_smtp_pro_backup_connection_enabled']    = $backup_connection_enabled;
 		$data['wp_mail_smtp_pro_smart_routing_enabled']        = $smart_routing_enabled;
 
+		// Rate Limiting usage tracking.
+		$data['wp_mail_smtp_pro_rate_limiting_enabled'] = (bool) RateLimiting::is_enabled();
+
 		return $data;
 	}
 
@@ -1188,5 +1234,32 @@ class Pro {
 		}
 
 		return $tasks;
+	}
+
+	/**
+	 * Load the rate limiting functionality.
+	 *
+	 * @since 4.0.0
+	 *
+	 * @return Emails\RateLimiting
+	 */
+	public function get_rate_limiting() {
+
+		static $rate_limiting;
+
+		if ( ! isset( $rate_limiting ) ) {
+			/**
+			 * Filter the RateLimiting object.
+			 *
+			 * @since 4.0.0
+			 *
+			 * @param RateLimiting $rate_limiting The RateLimiting object.
+			 */
+			$rate_limiting = apply_filters( 'wp_mail_smtp_pro_get_rate_limiting', new RateLimiting() );
+
+			$rate_limiting->hooks();
+		}
+
+		return $rate_limiting;
 	}
 }

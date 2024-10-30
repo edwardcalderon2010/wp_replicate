@@ -53,6 +53,8 @@ class HFE_Settings_Page {
 
 	/**
 	 * Load admin styles on header footer elementor edit screen.
+	 *
+	 * @return void
 	 */
 	public function enqueue_admin_scripts() {
 		wp_enqueue_script( 'hfe-admin-script', HFE_URL . 'admin/assets/js/ehf-admin.js', [ 'jquery', 'updates' ], HFE_VER, true );
@@ -87,7 +89,6 @@ class HFE_Settings_Page {
 			'hfe_admin_data',
 			$strings
 		);
-
 	}
 
 	/**
@@ -103,7 +104,6 @@ class HFE_Settings_Page {
 		$this->hfe_tabs();
 		$this->hfe_modal();
 		return $views;
-
 	}
 
 	/**
@@ -119,7 +119,6 @@ class HFE_Settings_Page {
 
 		register_setting( 'hfe-plugin-guide', 'hfe_guide_email' );
 		register_setting( 'hfe-plugin-guide', 'hfe_guide_fname' );
-
 	}
 
 	/**
@@ -131,7 +130,9 @@ class HFE_Settings_Page {
 	 * @return void
 	 */
 	public function hfe_compatibility_callback() {
-		_e( 'The Elementor Header & Footer Builder plugin need compatibility with your current theme to work smoothly.</br></br>Following are two methods that enable theme support for the plugin.</br></br>Method 1 is selected by default and that works fine almost will all themes. In case, you face any issue with the header or footer template, try choosing Method 2.', 'header-footer-elementor' );
+		$message      = __( 'The Elementor Header & Footer Builder plugin need compatibility with your current theme to work smoothly.</br></br>Following are two methods that enable theme support for the plugin.</br></br>Method 1 is selected by default and that works fine almost will all themes. In case, you face any issue with the header or footer template, try choosing Method 2.', 'header-footer-elementor' );
+		$allowed_html = [ 'br' => [] ];
+		echo wp_kses( $message, $allowed_html );
 	}
 
 	/**
@@ -155,8 +156,8 @@ class HFE_Settings_Page {
 			<input type="radio" name="hfe_compatibility_option" value= 2 <?php checked( $hfe_radio_button, 2 ); ?> > <div class="hfe_radio_options"><?php esc_html_e( 'Method 2', 'header-footer-elementor' ); ?></div>
 			<p class="description">
 				<?php
-				echo sprintf(
-					esc_html( "This method hides your theme's header & footer template with CSS and displays custom templates from the plugin.", 'header-footer-elementor' ),
+				printf(
+					esc_html__( "This method hides your theme's header & footer template with CSS and displays custom templates from the plugin.", 'header-footer-elementor' ),
 					'<br>'
 				);
 				?>
@@ -164,9 +165,17 @@ class HFE_Settings_Page {
 		</label>
 		<p class="description">
 			<?php
-			echo sprintf(
-				esc_html__( 'Sometimes above methods might not work well with your theme, in this case, contact your theme author and request them to add support for the <a href="https://github.com/Nikschavan/header-footer-elementor/wiki/Adding-Header-Footer-Elementor-support-for-your-theme">plugin.</>', 'header-footer-elementor' ),
-				'<br>'
+			/* translators: %s: URL to the plugin support page */
+			printf(
+				wp_kses(
+					__( 'Sometimes above methods might not work well with your theme, in this case, contact your theme author and request them to add support for the <a href="%s">plugin.</a>', 'header-footer-elementor' ),
+					[
+						'a' => [
+							'href' => [],
+						],
+					]
+				),
+				'https://github.com/Nikschavan/header-footer-elementor/wiki/Adding-Header-Footer-Elementor-support-for-your-theme'
 			);
 			?>
 		</p>
@@ -207,6 +216,7 @@ class HFE_Settings_Page {
 	 * Call back function for add submenu page function.
 	 *
 	 * @since 1.6.0
+	 * @return void
 	 */
 	public function hfe_settings_page() {
 		echo '<h1 class="hfe-heading-inline">';
@@ -240,6 +250,7 @@ class HFE_Settings_Page {
 	 * Call back function for add submenu page function.
 	 *
 	 * @since 1.6.2
+	 * @return (void | bool)
 	 */
 	public function hfe_modal() {
 		$is_dismissed = [];
@@ -515,22 +526,24 @@ class HFE_Settings_Page {
 	 * @return array
 	 */
 	protected function get_white_label() {
-		$white_labels = is_callable( 'Astra_Admin_Helper::get_admin_settings_option' ) ? \Astra_Admin_Helper::get_admin_settings_option( '_astra_ext_white_label', true ) : array();
+		$white_labels = is_callable( 'Astra_Admin_Helper::get_admin_settings_option' ) ? \Astra_Admin_Helper::get_admin_settings_option( '_astra_ext_white_label', true ) : [];
 
 		$theme_name = ! empty( $white_labels['astra']['name'] ) ? $white_labels['astra']['name'] : 'Astra';
 
-		return array(
+		return [
 			'theme_name'  => $theme_name,
+			/* translators: %s: theme name */
 			'description' => ! empty( $white_labels['astra']['description'] ) ? $white_labels['astra']['description'] : esc_html( sprintf( __( 'Powering over 1+ Million websites, %s is loved for the fast performance and ease of use it offers. It is suitable for all kinds of websites like blogs, portfolios, business, and WooCommerce stores.', 'header-footer-elementor' ), esc_html( $theme_name ) ) ),
 			'theme_icon'  => ! empty( $white_labels['astra']['icon'] ) ? $white_labels['astra']['icon'] : '',
 			'author_url'  => ! empty( $white_labels['astra']['author_url'] ) ? $white_labels['astra']['author_url'] : 'https://wpastra.com/',
-		);
+		];
 	}
 
 	/**
 	 * Display the General Info section of About tab.
 	 *
 	 * @since 1.6.0
+	 * @return void
 	 */
 	protected function output_about_info() {
 
@@ -549,6 +562,7 @@ class HFE_Settings_Page {
 
 				<p><?php esc_html_e( 'Trusted by more than 1+ Million users, Elementor Header & Footer Builder is a modern way to build advanced navigation for your website.', 'header-footer-elementor' ); ?></p>
 
+				<?php /* translators: %s: theme name */ ?>
 				<p><?php printf( esc_html__( 'This plugin is brought to you by the same team behind the popular WordPress theme %s and a series of Ultimate Addons plugins.', 'header-footer-elementor' ), esc_html( $white_labels['theme_name'] ) ); ?>
 
 			</div>
@@ -570,6 +584,7 @@ class HFE_Settings_Page {
 	 * Display the Addons section of About tab.
 	 *
 	 * @since 1.6.0
+	 * @return void
 	 */
 	protected function output_about_addons() {
 
@@ -835,7 +850,6 @@ class HFE_Settings_Page {
 
 		return array_merge( $custom, (array) $links );
 	}
-
 }
 
 new HFE_Settings_Page();

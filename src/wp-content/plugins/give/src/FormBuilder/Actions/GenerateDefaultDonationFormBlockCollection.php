@@ -17,13 +17,13 @@ class GenerateDefaultDonationFormBlockCollection
     {
         $section1 = $this->createSection(
             __('How much would you like to donate today?', 'give'),
-            __('All donations directly impact our organization and help us further our mission.?', 'give'),
+            __('All donations directly impact our organization and help us further our mission.', 'give'),
             $this->createAmountBlock()
         );
 
         $section2 = $this->createSection(
             __('Who\'s Giving Today?', 'give'),
-            __('We\'ll never share this information with anyone', 'give'),
+            __('We\'ll never share this information with anyone.', 'give'),
             $this->createDonorNameBlock(),
             $this->createEmailBlock()
         );
@@ -67,14 +67,13 @@ class GenerateDefaultDonationFormBlockCollection
             'attributes' => [
                 "label" => __("Donation Amount", 'give'),
                 "levels" => [
-                    10,
-                    25,
-                    50,
-                    100,
-                    250,
-                    500
+                    ['value' => 10, 'checked' => true],
+                    ['value' => 25],
+                    ['value' => 50],
+                    ['value' => 100],
+                    ['value' => 250],
+                    ['value' => 500],
                 ],
-                "defaultLevel" => 10,
                 "priceOption" => "multi",
                 "setPrice" => 25,
                 "customAmount" => true,

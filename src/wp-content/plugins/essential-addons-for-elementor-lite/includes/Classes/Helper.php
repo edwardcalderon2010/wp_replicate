@@ -227,6 +227,10 @@ class Helper
 		    $args['post__not_in'] = $settings['post__not_in'];
 	    }
 
+        if( 'product' === $post_type && function_exists('whols_lite') ){
+            $args['meta_query'] = array_filter( apply_filters( 'woocommerce_product_query_meta_query', $args['meta_query'], new \WC_Query() ) );
+        }
+
         return $args;
     }
 
@@ -681,7 +685,7 @@ class Helper
 		global $product;
 
 		if ( ! is_a( $product, 'WC_Product' ) ) {
-			return;
+			return ''; 
 		}
 
 		$separator = '';
@@ -770,6 +774,9 @@ class Helper
                     'key'   => '_stock_status',
                     'value' => 'instock'
                 ];
+            }
+            if( 'product' === $args['post_type'] && function_exists('whols_lite') ){
+                $args['meta_query'] = array_filter( apply_filters( 'woocommerce_product_query_meta_query', $args['meta_query'], new \WC_Query() ) );
             }
         }
 
@@ -908,7 +915,7 @@ class Helper
 	 */
 	public static function eael_pagination ($args, $settings) {
 
-		$pagination_Count          = intval( $args['total_post'] );
+		$pagination_Count          = intval( $args['total_post'] ?? 0 );
 		$paginationLimit           = intval( $settings['eael_product_grid_products_count'] ) ?: 4;
 		$pagination_Paginationlist = ceil( $pagination_Count / $paginationLimit );
 		$widget_id                 = sanitize_key( $settings['eael_widget_id'] );
@@ -1026,7 +1033,7 @@ class Helper
 	 * @return mixed|string
 	 */
     public static function eael_validate_html_tag( $tag ){
-	    return in_array( strtolower( $tag ), self::EAEL_ALLOWED_HTML_TAGS ) ? $tag : 'div';
+	    return in_array( strtolower( (string) $tag ), self::EAEL_ALLOWED_HTML_TAGS ) ? $tag : 'div';
     }
 
 	/**
@@ -1043,14 +1050,28 @@ class Helper
 		return wp_kses( $text, self::eael_allowed_tags(), array_merge( wp_allowed_protocols(), [ 'data' ] ) );
 	}
 
+    /**
+     * List of allowed protocols for wp_kses
+     *
+	 * eael_allowed_protocols
+	 * @return array
+	 */
+    public static function eael_allowed_protocols( $extra = [] ) {
+        $protocols = array_merge( wp_allowed_protocols(), [ 'data' ] );
+        if ( count( $extra ) > 0 ) {
+			$protocols = array_merge( $protocols, $extra );
+		}
+        return $protocols;
+	}
+
 	/**
      * List of allowed html tag for wp_kses
      *
 	 * eael_allowed_tags
 	 * @return array
 	 */
-	public static function eael_allowed_tags() {
-		return [
+	public static function eael_allowed_tags( $extra = [] ) {
+		$allowed_tags = [
 			'a'       => [
 				'href'   => [],
 				'title'  => [],
@@ -1059,6 +1080,7 @@ class Helper
 				'id'     => [],
 				'style'  => [],
 				'target' => [],
+				'data-elementor-open-lightbox' => [],
 			],
 			'q'       => [
 				'cite'  => [],
@@ -1283,7 +1305,7 @@ class Helper
 				'style' => [],
 				'align' => [],
 			],
-			'td'      => [
+			'td'     => [
 				'class'   => [],
 				'id'      => [],
 				'style'   => [],
@@ -1291,8 +1313,69 @@ class Helper
 				'colspan' => [],
 				'rowspan' => [],
 			],
+			'header' => [
+				'class' => [],
+				'id'    => [],
+				'style' => [],
+			],
+			'iframe' => [
+				'class'  => [],
+				'id'     => [],
+				'style'  => [],
+				'title'  => [],
+				'width'  => [],
+				'height' => [],
+				'src'    => []
+			]
 		];
+
+		if ( count( $extra ) > 0 ) {
+			$allowed_tags = array_merge_recursive( $allowed_tags, $extra );
+		}
+
+		return apply_filters( 'eael_allowed_tags', $allowed_tags );
 	}
+
+    /**
+     * List of allowed icon/svg tags for wp_kses
+     *
+	 * eael_allowed_icon_tags
+	 * @return array
+	 */
+    public static function eael_allowed_icon_tags(){
+        return [
+            'svg'   => [
+                'class'           => [],
+                'aria-hidden'     => [],
+                'aria-labelledby' => [],
+                'role'            => [],
+                'xmlns'           => [],
+                'width'           => [],
+                'height'          => [],
+                'viewbox'         => []
+            ],
+            'g'     => [ 'fill'  => [] ],
+            'title' => [ 'title' => [] ],
+            'path'     => [
+                'd'    => [], 
+                'fill' => [] 
+            ],
+			'i'      => [
+				'class' => [],
+				'id'    => [],
+				'style' => []
+			],
+            'img'     => [
+				'src'    => [],
+				'alt'    => [],
+				'height' => [],
+				'width'  => [],
+				'class'  => [],
+				'id'     => [],
+				'style'  => []
+			],
+        ];
+    }
 
     public static function eael_fetch_color_or_global_color($settings, $control_name=''){
         if( !isset($settings[$control_name])) {
@@ -1417,6 +1500,37 @@ class Helper
 		}
 	}
 
+    /**
+     * Get all ordered products by the user
+     * @return boolean|array order ids
+     * @since 5.8.9
+     */
+    public static function eael_get_all_user_ordered_products() {
+        $user_id = get_current_user_id();
+
+        if( ! $user_id ) {
+            return false;
+        }
+
+        $args = array(
+            'customer_id' => $user_id,
+            'limit' => -1,
+        );
+
+        $orders = wc_get_orders($args);
+        $product_ids = [];
+
+        foreach( $orders as $order ){
+            $items = $order->get_items();
+            
+            foreach($items as $item){
+                $product_ids[] = $item->get_product_id();
+            }
+        }
+
+        return $product_ids;
+    }
+
 	/**
 	 * Get current device by screen size
 	 *
@@ -1459,5 +1573,59 @@ class Helper
 
 		// If no match is found, you can return a default value or handle it as needed.
 		return "unknown";
+	}
+
+    public static function get_all_acf_fields() {
+
+        if ( ! class_exists( 'ACF' ) || ! function_exists( 'acf_get_field_groups' ) ) {
+            return [];
+        }
+
+        $acf_field_groups = acf_get_field_groups();
+
+        if ( empty( $acf_field_groups ) ) return [];
+
+        $acf_fields = [];
+		foreach( $acf_field_groups as $group ){
+			$default_acf_fields = acf_get_fields( $group['key'] );
+			if ( ! empty( $default_acf_fields ) ) {
+				foreach( $default_acf_fields as $field ) {
+					$acf_fields[ $field['name'] ] = [
+						'ID'    => $field['ID'],
+						'key'   => $field['key'],
+						'label' => $field['label'] ?? '',
+						'name'  => $field['name'] ?? '',
+						'type'  => $field['type'],
+						'group' => $group['title'] ?? '',
+					];
+				}
+			}
+		}
+    
+        return $acf_fields;
+    }
+
+    public static function eael_get_attachment_id_from_url( $attachment_url ) {
+        global $wpdb;
+    
+        // Strip the image size from the file name (if any)
+        $attachment_url = preg_replace( '/-\d+x\d+(?=\.[^.\s]{2,4}$)/i', '', $attachment_url );
+    
+        // Prepare the query to search in the 'guid' column in 'wp_posts'
+        $attachment_id = $wpdb->get_var( $wpdb->prepare(
+            "SELECT ID FROM $wpdb->posts WHERE guid = %s AND post_type = 'attachment'", $attachment_url
+        ));
+    
+        return $attachment_id;
+    }
+      
+    public static function eael_rating_markup( $rating, $count ) {
+        $html = '';
+		if ( 0 == $rating ) {
+			$html  = '<div class="eael-star-rating star-rating">';
+			$html .= wc_get_star_rating_html( $rating, $count );
+			$html .= '</div>';
+		}
+		return $html;
 	}
 }

@@ -1480,7 +1480,7 @@ class Woo_Cart extends Widget_Base {
 			]
 		);
 
-        $this->add_control(
+        $this->add_responsive_control(
             'eael_woo_cart_table_style_icon_size',
             [
                 'label'       => __( 'Icon Size', 'essential-addons-for-elementor-lite' ),
@@ -1495,8 +1495,11 @@ class Woo_Cart extends Widget_Base {
                 ],
                 'selectors' => [
                     '{{WRAPPER}} .eael-woo-cart-wrapper form.eael-woo-cart-form .eael-woo-cart-table .product-remove a svg,
+                    .eael-woo-cart {{WRAPPER}} .eael-woo-cart-wrapper.eael-woo-style-2 form.eael-woo-cart-form .eael-woo-cart-table .product-thumbnail .eael-woo-cart-product-remove,
+                    {{WRAPPER}} .eael-woo-cart-wrapper.eael-woo-style-2 form.eael-woo-cart-form .eael-woo-cart-table .product-thumbnail .eael-woo-cart-product-remove a svg,
 					{{WRAPPER}} .eael-woo-cart-wrapper.eael-woo-style-2 form.eael-woo-cart-form .eael-woo-cart-table .eael-woo-cart-tr .eael-woo-cart-td.product-remove a svg' => 'height: {{SIZE}}{{UNIT}};width: {{SIZE}}{{UNIT}};line-height: {{SIZE}}{{UNIT}};',
                     '{{WRAPPER}} .eael-woo-cart-wrapper form.eael-woo-cart-form .eael-woo-cart-table .product-remove a i,
+                    {{WRAPPER}} .eael-woo-cart-wrapper form.eael-woo-cart-form .eael-woo-cart-table .product-thumbnail .eael-woo-cart-product-remove a i,
 					{{WRAPPER}} .eael-woo-cart-wrapper.eael-woo-style-2 form.eael-woo-cart-form .eael-woo-cart-table .eael-woo-cart-tr .eael-woo-cart-td.product-remove a i' => 'font-size: {{SIZE}}{{UNIT}};',
                 ],
             ]
@@ -2671,11 +2674,11 @@ class Woo_Cart extends Widget_Base {
 		$this->ea_woo_cart_add_actions( $settings );
 
 		// Please don't print anything above this line otherwise session will not work properly.
-		$deviceName = Helper::eael_get_current_device_by_screen();
-		if ( ! \Elementor\Plugin::$instance->editor->is_edit_mode() && ! empty( $settings["hide_{$deviceName}"] ) ) {
-            echo "<!-- This content is hidden on {$deviceName} devices -->";
-			return;
-		}
+//		$deviceName = Helper::eael_get_current_device_by_screen();
+//		if ( ! \Elementor\Plugin::$instance->editor->is_edit_mode() && ! empty( $settings["hide_{$deviceName}"] ) ) {
+//            echo "<!-- This content is hidden on {$deviceName} devices -->";
+//			return;
+//		}
 
 		add_filter( 'wc_empty_cart_message', [ $this, 'wc_empty_cart_message' ] );
 

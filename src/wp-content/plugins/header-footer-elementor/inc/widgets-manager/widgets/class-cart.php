@@ -87,6 +87,7 @@ class Cart extends Widget_Base {
 	 *
 	 * @since 1.5.7
 	 * @access protected
+	 * @return void
 	 */
 	protected function register_controls() {
 
@@ -99,6 +100,7 @@ class Cart extends Widget_Base {
 	 *
 	 * @since 1.4.0
 	 * @access protected
+	 * @return void
 	 */
 	protected function register_general_content_controls() {
 
@@ -224,6 +226,7 @@ class Cart extends Widget_Base {
 	 *
 	 * @since 1.4.0
 	 * @access protected
+	 * @return void
 	 */
 	protected function register_cart_typo_content_controls() {
 		$this->start_controls_section(
@@ -607,6 +610,7 @@ class Cart extends Widget_Base {
 	 *
 	 * @since 1.4.0
 	 * @access protected
+	 * @return void
 	 */
 	protected function render() {
 
@@ -648,7 +652,7 @@ class Cart extends Widget_Base {
 							<span class="elementor-button-icon" data-counter="<?php echo ( null !== WC()->cart ) ? esc_attr( WC()->cart->get_cart_contents_count() ) : ''; ?>">
 								<i class="eicon" aria-hidden="true"></i>
 								<span class="elementor-screen-only">
-									<?php _e( 'Cart', 'header-footer-elementor' ); ?>
+									<?php esc_html_e( 'Cart', 'header-footer-elementor' ); ?>
 								</span>
 							</span>
 						</a>	
@@ -667,6 +671,7 @@ class Cart extends Widget_Base {
 	 *
 	 * @since 1.4.0
 	 * @access protected
+	 * @return void
 	 */
 	protected function content_template() {
 	}

@@ -313,6 +313,9 @@ class WPSEO_Admin_Asset_Manager {
 				self::PREFIX . 'externals-contexts',
 				self::PREFIX . 'externals-redux',
 			],
+			'new-dashboard'            => [
+				self::PREFIX . 'api-client',
+			],
 		];
 
 		$plugin_scripts   = $this->load_generated_asset_file(
@@ -361,7 +364,7 @@ class WPSEO_Admin_Asset_Manager {
 				'wp-components',
 				'wp-element',
 				'wp-i18n',
-				self::PREFIX . 'yoast-components',
+				self::PREFIX . 'components-new-package',
 				self::PREFIX . 'externals-components',
 			],
 			'version' => $scripts['installation-success']['version'],
@@ -402,7 +405,7 @@ class WPSEO_Admin_Asset_Manager {
 				self::PREFIX . 'externals-redux',
 				self::PREFIX . 'analysis',
 				self::PREFIX . 'react-select',
-				self::PREFIX . 'yoast-components',
+				self::PREFIX . 'components-new-package',
 			],
 			'version' => $scripts['workouts']['version'],
 		];
@@ -503,7 +506,6 @@ class WPSEO_Admin_Asset_Manager {
 			'helpers'                     => 'helpers-package',
 			'jed'                         => 'jed-package',
 			'chart.js'                    => 'chart.js-package',
-			'legacy-components'           => 'components-package',
 			'network-admin-script'        => 'network-admin',
 			'redux'                       => 'redux-package',
 			'replacement-variable-editor' => 'replacement-variable-editor-package',
@@ -583,6 +585,10 @@ class WPSEO_Admin_Asset_Manager {
 				],
 			],
 			[
+				'name' => 'ai-fix-assessments',
+				'src'  => 'ai-fix-assessments-' . $flat_version,
+			],
+			[
 				'name' => 'introductions',
 				'src'  => 'introductions-' . $flat_version,
 				'deps' => [ self::PREFIX . 'tailwind' ],
@@ -628,7 +634,11 @@ class WPSEO_Admin_Asset_Manager {
 			[
 				'name' => 'structured-data-blocks',
 				'src'  => 'structured-data-blocks-' . $flat_version,
-				'deps' => [ 'wp-edit-blocks' ],
+				'deps' => [
+					'dashicons',
+					'forms',
+					'wp-edit-blocks',
+				],
 			],
 			[
 				'name' => 'elementor',
@@ -651,6 +661,11 @@ class WPSEO_Admin_Asset_Manager {
 			[
 				'name' => 'academy',
 				'src'  => 'academy-' . $flat_version,
+				'deps' => [ self::PREFIX . 'tailwind' ],
+			],
+			[
+				'name' => 'new-dashboard',
+				'src'  => 'new-dashboard-' . $flat_version,
 				'deps' => [ self::PREFIX . 'tailwind' ],
 			],
 			[

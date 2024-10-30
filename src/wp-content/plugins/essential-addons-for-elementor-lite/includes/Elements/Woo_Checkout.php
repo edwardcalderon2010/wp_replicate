@@ -122,18 +122,34 @@ class Woo_Checkout extends Widget_Base {
 				'label' => esc_html__( 'General Settings', 'essential-addons-for-elementor-lite' ),
 			]
 		);
+
+		$template_list = apply_filters('eael/woo-checkout/layout', [
+			'default'     => esc_html__( 'Default', 'essential-addons-for-elementor-lite' ),
+			'multi-steps' => esc_html__( 'Multi Steps (Pro)', 'essential-addons-for-elementor-lite' ),
+			'split'       => esc_html__( 'Split (Pro)', 'essential-addons-for-elementor-lite' ),
+		]);
+        $layout_options = [];
+
+		if( ! empty( $template_list ) ){
+            $image_path = EAEL_PLUGIN_URL . 'assets/admin/images/layout-previews/woo-checkout-';
+            foreach( $template_list as $key => $label ){
+                $layout_options[ $key ] = [
+                    'title' => $label,
+                    'image' => $image_path . $key . '.png'
+                ];
+            }
+        }
+
 		$this->add_control(
 			'ea_woo_checkout_layout',
 			[
-				'label' => esc_html__( 'Layout', 'essential-addons-for-elementor-lite' ),
-				'type' => Controls_Manager::SELECT,
-				'default' => 'default',
-				'label_block' => false,
-				'options' => apply_filters('eael/woo-checkout/layout', [
-					'default' => esc_html__( 'Default', 'essential-addons-for-elementor-lite' ),
-					'multi-steps' => esc_html__( 'Multi Steps (Pro)', 'essential-addons-for-elementor-lite' ),
-					'split' => esc_html__( 'Split (Pro)', 'essential-addons-for-elementor-lite' ),
-				]),
+				'label'       => esc_html__( 'Layout', 'essential-addons-for-elementor-lite' ),
+				'type'        => Controls_Manager::CHOOSE,
+				'options'     => $layout_options,
+				'default'     => 'default',
+				'label_block' => true,
+                'toggle'      => false,
+                'image_choose'=> true,
 			]
 		);
 
@@ -1046,6 +1062,18 @@ class Woo_Checkout extends Widget_Base {
 				'selector' => '{{WRAPPER}} .ea-woo-checkout-order-review .table-row',
 			]
 		);
+
+		$this->add_group_control(
+			\Elementor\Group_Control_Border::get_type(),
+			[
+				'name'      => 'ea_woo_checkout_order_review_row_border',
+				'selector'  => '{{WRAPPER}} .ea-woo-checkout-order-review .table-row',
+				'condition' => [
+					'ea_woo_checkout_layout' => 'default',
+				],
+			]
+		);
+
 		$this->add_responsive_control(
 			'ea_woo_checkout_order_review_row_border_radius',
 			[
@@ -1233,17 +1261,17 @@ class Woo_Checkout extends Widget_Base {
 
 		$this->end_controls_tabs();
 
-		$this->add_control(
-			'ea_woo_checkout_order_review_footer_border_color',
+		$this->add_group_control(
+			Group_Control_Border::get_type(),
 			[
-				'label' => esc_html__( 'Border Color', 'essential-addons-for-elementor-lite' ),
-				'type' => Controls_Manager::COLOR,
-				'default' => '#404040',
-				'selectors' => [
-					'{{WRAPPER}} .ea-woo-checkout-order-review .footer-content > div' => 'border-color: {{VALUE}};',
+				'name'      => 'ea_woo_checkout_order_review_footer_border',
+				'selector'  => '{{WRAPPER}} .ea-woo-checkout-order-review .footer-content',
+				'condition' => [
+					'ea_woo_checkout_layout' => 'default',
 				],
 			]
 		);
+
 		$this->add_responsive_control(
 			'ea_woo_checkout_order_review_footer_border_radius',
 			[
@@ -1452,6 +1480,26 @@ class Woo_Checkout extends Widget_Base {
 				],
 			]
 		);
+
+		$this->add_responsive_control(
+			'ea_woo_checkout_login_icon_position',
+			[
+				'label'              => esc_html__( 'Icon Position', 'essential-addons-for-elementor-lite' ),
+				'type'               => Controls_Manager::DIMENSIONS,
+				'size_units'         => [ 'px', 'em', '%' ],
+				'allowed_dimensions' => [ 'top', 'left' ],
+				'default' 			 => [
+					'top'      => 24,
+					'left'     => 35,
+					'unit'     => 'px',
+					'isLinked' =>  true,
+				],
+				'selectors'          => [
+					'{{WRAPPER}} .ea-woo-checkout .ea-login-icon' => 'top: {{TOP}}{{UNIT}}; left: {{LEFT}}{{UNIT}};',
+				],
+			]
+		);
+
 		$this->add_control(
 			'ea_woo_checkout_login_links_color',
 			[
@@ -1490,7 +1538,6 @@ class Woo_Checkout extends Widget_Base {
 				'size_units' => [ 'px', 'em', '%' ],
 				'selectors' => [
 					'{{WRAPPER}} .woo-checkout-login' => 'padding: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}};',
-					'{{WRAPPER}} .ea-woo-checkout .ea-login-icon' => 'top: {{TOP}}{{UNIT}}; left: {{LEFT}}{{UNIT}};',
 				],
 			]
 		);
@@ -1811,6 +1858,26 @@ class Woo_Checkout extends Widget_Base {
                 ],
             ]
         );
+
+		$this->add_responsive_control(
+			'ea_woo_checkout_coupon_icon_position',
+			[
+				'label'              => esc_html__( 'Icon Position', 'essential-addons-for-elementor-lite' ),
+				'type'               => Controls_Manager::DIMENSIONS,
+				'size_units'         => [ 'px', 'em', '%' ],
+				'allowed_dimensions' => [ 'top', 'left' ],
+				'default' 			 => [
+					'top'      => 24,
+					'left'     => 35,
+					'unit'     => 'px',
+					'isLinked' =>  true,
+				],
+				'selectors'          => [
+					'{{WRAPPER}} .ea-woo-checkout .ea-coupon-icon' => 'top: {{TOP}}{{UNIT}}; left: {{LEFT}}{{UNIT}};',
+				],
+			]
+		);
+		
 		$this->add_control(
 			'ea_woo_checkout_coupon_links_color',
 			[
@@ -1886,7 +1953,6 @@ class Woo_Checkout extends Widget_Base {
 				'size_units' => [ 'px', 'em', '%' ],
 				'selectors' => [
 					'{{WRAPPER}} .woo-checkout-coupon' => 'padding: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}};',
-					'{{WRAPPER}} .ea-woo-checkout .ea-coupon-icon' => 'top: {{TOP}}{{UNIT}}; left: {{LEFT}}{{UNIT}};',
 				],
 			]
 		);
@@ -2420,10 +2486,30 @@ class Woo_Checkout extends Widget_Base {
 				'type' => Controls_Manager::COLOR,
 				'default' => '#443e6d',
 				'selectors' => [
-					'{{WRAPPER}} #customer_details input, {{WRAPPER}} #customer_details select, {{WRAPPER}} #customer_details textarea' => 'color: {{VALUE}};',
+					'{{WRAPPER}} #customer_details .form-row .woocommerce-input-wrapper input' => 'color: {{VALUE}};', 
+					'{{WRAPPER}} #customer_details .form-row .woocommerce-input-wrapper select' => 'color: {{VALUE}};', 
+					'{{WRAPPER}} #customer_details .form-row .woocommerce-input-wrapper textarea' => 'color: {{VALUE}};',
+					'{{WRAPPER}} #customer_details .form-row .woocommerce-input-wrapper .select2-selection span' => 'color: {{VALUE}};',
 				],
 			]
 		);
+
+		$this->add_control(
+			'ea_woo_checkout_customer_details_field_bg_color',
+			[
+				'label' => esc_html__( 'Background Color', 'essential-addons-for-elementor-lite' ),
+				'type' => Controls_Manager::COLOR,
+				'default' => '#fff',
+				'selectors' => [
+					'{{WRAPPER}} #customer_details .form-row .woocommerce-input-wrapper input' => 'background: {{VALUE}};',
+					'{{WRAPPER}} #customer_details .form-row .woocommerce-input-wrapper select' => 'background: {{VALUE}};',
+					'{{WRAPPER}} #customer_details .form-row .woocommerce-input-wrapper textarea' => 'background: {{VALUE}};',
+					'{{WRAPPER}} #customer_details .form-row .woocommerce-input-wrapper .select2-selection' => 'background: {{VALUE}};',
+				],
+			]
+		);
+
+
 		$this->start_controls_tabs( 'ea_woo_checkout_customer_details_field_tabs' );
 
 		$this->start_controls_tab( 'ea_woo_checkout_customer_details_field_tab_normal', [ 'label' => esc_html__( 'Normal', 'essential-addons-for-elementor-lite' ) ] );
@@ -2435,7 +2521,11 @@ class Woo_Checkout extends Widget_Base {
 				'type' => Controls_Manager::COLOR,
 				'default' => '#cccccc',
 				'selectors' => [
-					'{{WRAPPER}} #customer_details input, {{WRAPPER}} #customer_details .select, {{WRAPPER}} #customer_details .select2-container--default .select2-selection--single, {{WRAPPER}} #customer_details textarea' => 'border-color: {{VALUE}};',
+					'{{WRAPPER}} #customer_details input, 
+					{{WRAPPER}} #customer_details .select, 
+					{{WRAPPER}} .ea-woo-checkout .woocommerce-input-wrapper select, 
+					{{WRAPPER}} #customer_details .select2-container--default .select2-selection--single, 
+					{{WRAPPER}} #customer_details textarea' => 'border-color: {{VALUE}};',
 				],
 			]
 		);
@@ -2754,6 +2844,14 @@ class Woo_Checkout extends Widget_Base {
 			]
 		);
 
+		$this->add_group_control(
+			Group_Control_Typography::get_type(),
+			[
+				'name' => 'ea_woo_checkout_payment_methods_typo',
+				'selector' => '.eael-woo-checkout {{WRAPPER}} .woo-checkout-payment .payment_box p',
+			]
+		);
+
 		// Privacy Policy
 		$this->add_control(
 			'ea_woo_checkout_privacy_policy',
@@ -2845,7 +2943,7 @@ class Woo_Checkout extends Widget_Base {
 			[
 				'label' => __( 'Background Color', 'essential-addons-for-elementor-lite' ),
 				'type' => Controls_Manager::COLOR,
-				'default' => '#7866ff',
+				'default' => '#5842FF',
 				'selectors' => [
 					'{{WRAPPER}} #place_order' => 'background-color: {{VALUE}};background: {{VALUE}};',
 				],
@@ -3014,7 +3112,7 @@ class Woo_Checkout extends Widget_Base {
 		$_fields = [];
 		$classes = [ 'form-row-first', 'form-row-last', 'form-row-wide' ];
 		foreach ( $fields as $key => $field_set ) {
-			$field_set_class = is_array( $field_set['class'] ) ? $field_set['class'] : [];
+			$field_set_class = isset( $field_set['class'] ) && is_array( $field_set['class'] ) ? $field_set['class'] : [];
 			$_fields[]       = [
 				'field_label'       => $field_set['label'],
 				'field_key'         => $key,
@@ -3067,11 +3165,11 @@ class Woo_Checkout extends Widget_Base {
 
 		$settings = $this->get_settings_for_display();
 		// Please don't print anything above this line otherwise session will not work properly.
-		$deviceName = \Essential_Addons_Elementor\Classes\Helper::eael_get_current_device_by_screen();
-		if ( ! \Elementor\Plugin::$instance->editor->is_edit_mode() && ! empty( $settings["hide_{$deviceName}"] ) ) {
-			echo "<!-- This content is hidden on {$deviceName} devices -->";
-			return;
-		}
+//		$deviceName = \Essential_Addons_Elementor\Classes\Helper::eael_get_current_device_by_screen();
+//		if ( ! \Elementor\Plugin::$instance->editor->is_edit_mode() && ! empty( $settings["hide_{$deviceName}"] ) ) {
+//			echo "<!-- This content is hidden on {$deviceName} devices -->";
+//			return;
+//		}
 
 		/**
 		 * Remove WC Coupon Action From  Neve Theme
@@ -3099,6 +3197,12 @@ class Woo_Checkout extends Widget_Base {
 			'layout-'. $settings['ea_woo_checkout_layout'],
 			$settings['eael_enable_checkout_fields_reorder'] === 'yes' ? 'checkout-reorder-enabled' : ''
 		] );
+
+		$astra_pro = get_option( '_astra_ext_enabled_extensions' );
+
+		if ( !empty( $astra_pro ) && isset( $astra_pro['woocommerce'] ) && $astra_pro['woocommerce'] === 'woocommerce' ) {
+			$this->add_render_attribute( 'container', 'class', 'astra-pro-wc-module-activated' );
+		}
 
 		if ( $settings['eael_enable_checkout_fields_reorder'] === 'yes' ){
 			global $post;
