@@ -119,9 +119,10 @@ class GTag {
 		$gtag_src = $this->get_gtag_src();
 
 		// phpcs:ignore WordPress.WP.EnqueuedResourceParameters.MissingVersion
-		wp_enqueue_script( self::HANDLE, $gtag_src, false, null, false );
-		wp_script_add_data( self::HANDLE, 'script_execution', 'async' );
+		wp_enqueue_script( self::HANDLE, $gtag_src, false, null, array('in_footer' => 'true', 'strategy' => 'defer' ) );
+		//wp_script_add_data( self::HANDLE, 'script_execution', 'async' );
 
+		/*
 		// Note that `gtag()` may already be defined via the `Consent_Mode` output, but this is safe to call multiple times.
 		wp_add_inline_script( self::HANDLE, 'window.dataLayer = window.dataLayer || [];function gtag(){dataLayer.push(arguments);}' );
 
@@ -148,6 +149,7 @@ class GTag {
 		};
 
 		add_filter( 'script_loader_tag', $filter_google_gtagjs, 20, 2 );
+		 */
 	}
 
 	/**

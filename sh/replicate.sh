@@ -185,8 +185,13 @@ reset_wp_dir() {
 	"$sudo_cmd" rm -rf "$wp_dir"/.htaccess
 	"$sudo_cmd" cp $temp_wp_htaccess "$wp_dir"/.htaccess
 
+	# Update PHP files
+	echo "6/10 Apply PHP updates to wp-content and wp-includes";
+	"$sudo_cmd" cp -r "${home_dir}src/wp-content" "$wp_dir"/
+	"$sudo_cmd" cp -r "${home_dir}src/wp-includes" "$wp_dir"/
+
 	# Set permissions
-	echo "6/10 Set owner, group, access to $wp_dir";
+	echo "7/10 Set owner, group, access to $wp_dir";
     if [ "$super_user" = "true" ]; then
         "$sudo_cmd" chown -R www-data "$wp_dir"/
         "$sudo_cmd" chgrp -R admin "$wp_dir"/
@@ -194,7 +199,7 @@ reset_wp_dir() {
 	"$sudo_cmd" chmod -R 755 "$wp_dir"/
 	
 	# Reconfigure wp-config
-	echo "7/10 Reconfigure $wp_dir/wp-config.php";
+	echo "8/10 Reconfigure $wp_dir/wp-config.php";
 	"$sudo_cmd" sed -i "s/\(^define(\s\+\o47DB_NAME\o47\o54\s\+\o47\).*\(\o47\)/\1$db_name\2/g" "$wp_dir"/wp-config.php
 	"$sudo_cmd" sed -i "s/\(^define(\s\+\o47DB_USER\o47\o54\s\+\o47\).*\(\o47\)/\1$db_user\2/g" "$wp_dir"/wp-config.php
 	"$sudo_cmd" sed -i "s/\(^define(\s\+\o47DB_PASSWORD\o47\o54\s\+\o47\).*\(\o47\)/\1$db_pwd\2/g" "$wp_dir"/wp-config.php

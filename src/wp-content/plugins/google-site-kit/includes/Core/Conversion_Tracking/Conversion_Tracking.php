@@ -149,7 +149,7 @@ class Conversion_Tracking {
 			}
 		';
 
-		wp_add_inline_script( GTag::HANDLE, preg_replace( '/\s+/', ' ', $gtag_event ) );
+		//wp_add_inline_script( GTag::HANDLE, preg_replace( '/\s+/', ' ', $gtag_event ) );
 	}
 
 	/**

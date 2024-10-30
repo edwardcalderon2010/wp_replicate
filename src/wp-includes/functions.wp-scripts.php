@@ -180,6 +180,7 @@ function wp_register_script( $handle, $src, $deps = array(), $ver = false, $args
 	if ( ! is_array( $args ) ) {
 		$args = array(
 			'in_footer' => (bool) $args,
+			'strategy' => 'defer'
 		);
 	}
 	_wp_scripts_maybe_doing_it_wrong( __FUNCTION__, $handle );
