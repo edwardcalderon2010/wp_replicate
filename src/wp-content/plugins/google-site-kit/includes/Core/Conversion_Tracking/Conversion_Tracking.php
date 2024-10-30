@@ -149,7 +149,9 @@ class Conversion_Tracking {
 			}
 		';
 
-		wp_add_inline_script( GTag::HANDLE, preg_replace( '/\s+/', ' ', $gtag_event ) );
+        // WEB-2: disabling script tag insertion - to be replaced with manual inject via HF plugin.
+        // Specifically to enable script to be loaded via jquery after window has loaded
+		//wp_add_inline_script( GTag::HANDLE, preg_replace( '/\s+/', ' ', $gtag_event ) );
 	}
 
 	/**

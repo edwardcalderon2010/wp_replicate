@@ -178,6 +178,7 @@ function wp_add_inline_script( $handle, $data, $position = 'after' ) {
  */
 function wp_register_script( $handle, $src, $deps = array(), $ver = false, $args = array() ) {
 	if ( ! is_array( $args ) ) {
+        // WEB-2: If a boolean is passed in place of $args; assume its for enabling footer placement AND for defer loading
 		$args = array(
 			'in_footer' => (bool) $args,
 			'strategy' => 'defer'

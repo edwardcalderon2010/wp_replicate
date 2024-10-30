@@ -13,19 +13,23 @@ class Assets
      */
     public function loadFrontendAssets()
     {
-        wp_enqueue_style(
-            'give-donation-summary-style-frontend',
-            GIVE_PLUGIN_URL . 'assets/dist/css/give-donation-summary.css',
-            [],
-            GIVE_VERSION
-        );
+        // WEB-2: Disabling unnecessary CSS load from home page
+        if ( ! is_front_page() ) {
+            wp_enqueue_style(
+                'give-donation-summary-style-frontend',
+                GIVE_PLUGIN_URL . 'assets/dist/css/give-donation-summary.css',
+                [],
+                GIVE_VERSION
+            );
+        }
 
+        // WEB-2: Enabling JS to be loaded in footer with defer
         wp_enqueue_script(
             'give-donation-summary-script-frontend',
             GIVE_PLUGIN_URL . 'assets/dist/js/give-donation-summary.js',
             ['wp-i18n'],
             GIVE_VERSION,
-            true
+            array( 'in_footer' => 'true', 'strategy' => 'defer' )
         );
 
         wp_localize_script(
