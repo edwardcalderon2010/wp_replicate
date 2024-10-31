@@ -17,3 +17,6 @@ sudo chmod -R 755 ea_staging/
 sudo sed -i 's/\(^define(\s\+\o47DB_NAME\o47\o54\s\+\o47\).*\(\o47\)/\1empower_autism_staging\2/g' wp-config.php
 sudo sed -i 's/\(^define(\s\+\o47DB_USER\o47\o54\s\+\o47\).*\(\o47\)/\1empower_autism_user\2/g' wp-config.php
 sudo sed -i 's/\(^define(\s\+\o47DB_PASSWORD\o47\o54\s\+\o47\).*\(\o47\)/\1r3#dW@Hs0s4!\2/g' wp-config.php
+
+# Dump MySQL table from CLI:
+mysqldump -u root -p --databases empower_autism_staging --skip-add-drop-table --skip-add-locks --skip-disable-keys --complete-insert > empower_autism_staging.sql
