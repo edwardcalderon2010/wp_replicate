@@ -20,3 +20,6 @@ sudo sed -i 's/\(^define(\s\+\o47DB_PASSWORD\o47\o54\s\+\o47\).*\(\o47\)/\1r3#dW
 
 # Dump MySQL table from CLI:
 mysqldump -u root -p --databases empower_autism_staging --skip-add-drop-table --skip-add-locks --skip-disable-keys --complete-insert > empower_autism_staging.sql
+
+# Update old IP refs from target wp_root
+tgt_list=($(grep -irl "35.201.0.16" /var/www/wp.cyber.com/wpstaginginst/)); for itm in "${tgt_list[@]}"; do echo "Processing file: $itm"; sudo sed -i "s/35.201.0.16/34.116.88.72/g" $itm; done
